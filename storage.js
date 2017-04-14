@@ -37,7 +37,10 @@ module.exports = function(config) {
 
 	var messages = {
 		save: function(msg, cb) {
-			msg.id = uuid();
+			if (!msg.id) {
+				msg.id = uuid();
+			}
+			
 			if (isLocal) {
 				msg_db.save(msg.id, msg, cb);
 			}
