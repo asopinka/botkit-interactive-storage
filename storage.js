@@ -62,14 +62,6 @@ module.exports = function(config) {
 					});
 				}));
 			}
-		},
-		delete: function(id, cb) {
-			if (isLocal) {
-				msg_db.delete(id, cb);
-			}
-			else {
-				msg_db.remove({ id: id }, cb);
-			}
 		}
 	};
 
