@@ -1,0 +1,13 @@
+{
+  "name": "botkit-interactive-storage",
+  "version": "1.0.0",
+  "description": "Simple storage for your Botkit interactive callback messages.",
+  "main": "storage.js",
+  "author": "Alex Sopinka",
+  "license": "MIT",
+  "dependencies": {
+    "jfs": "^0.2.6",
+    "monk": "^4.0.0",
+    "uuid": "^3.0.1"
+  }
+}
