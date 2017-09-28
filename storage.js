@@ -58,7 +58,7 @@ module.exports = function(config) {
 				});
 			}
 			else {
-				msg_db.set(msg.id, msg, function(err, result) {
+				msg_db.set(msg.id, JSON.stringify(msg), function(err, result) {
 					cb(null, result.id);
 				})
 			}
@@ -80,7 +80,7 @@ module.exports = function(config) {
 			}
 			else {
 				msg_db.get(msg.id, function(err, result) {
-					cb(null, result);
+					cb(null, JSON.parse(result));
 				});
 			}
 		}
