@@ -59,7 +59,7 @@ module.exports = function(config) {
 			}
 			else {
 				msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
-					cb(null, result.id);
+					cb(null, msg.id);
 				})
 			}
 		},
