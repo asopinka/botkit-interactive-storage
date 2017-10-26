@@ -58,9 +58,23 @@ module.exports = function(config) {
 				});
 			}
 			else {
-				msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
-					cb(null, msg.id);
-				})
+				try {
+					msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+						cb(null, msg.id);
+					});
+				}
+				catch(ex) {
+					try {
+						setTimeout(function() {
+							msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+								cb(null, msg.id);
+							});
+						}, 5000);
+					}
+					catch(ex) {
+						cb(null, 0);
+					}
+				}
 			}
 		},
 		get: function(id, cb) {
@@ -79,9 +93,23 @@ module.exports = function(config) {
 				}));
 			}
 			else {
-				msg_db.get('interactive:' + id, function(err, result) {
-					cb(null, JSON.parse(result));
-				});
+				try {
+					msg_db.get('interactive:' + id, function(err, result) {
+						cb(null, JSON.parse(result));
+					});
+				}
+				catch(ex) {
+					try {
+						setTimeout(function() {
+							msg_db.get('interactive:' + id, function(err, result) {
+								cb(null, JSON.parse(result));
+							});
+						}, 5000);
+					}
+					catch(ex) {
+						cb(null, {});
+					}
+				}
 			}
 		}
 	};
