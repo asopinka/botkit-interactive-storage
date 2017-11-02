@@ -41,6 +41,10 @@ module.exports = function(config) {
 		msg_db = redis.createClient({
 			url: config.redis_uri
 		});
+
+		msg_db.on('error', function (err) {
+			console.log('Redis error: ' + err);
+		});
 	}
 
 	var messages = {
