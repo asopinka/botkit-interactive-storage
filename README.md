@@ -3,7 +3,7 @@ Simple storage for your Botkit interactive callback messages.
   
 ### Install
 
-`npm install botkit-interactive-storage --save`
+`npm install botkit-interactive-storage --save` OR  
 `yarn add botkit-interactive-storage`
 
 ### Usage with Async/Await and ES6/7 syntax (New New)
