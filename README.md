@@ -11,7 +11,7 @@ Simple storage for your Botkit interactive callback messages.
 Wherever you need to *save* or *retrieve* a big juicy JSON object for use in an interactive message callback, ensure you add the following:
 
 ```
-var interactiveStorage = require('botkit-interactive-storage')({ mongo_uri: '<YOUR_MONGO_URL' });
+const interactiveStorage = require('botkit-interactive-storage')({ mongo_uri: '<YOUR_MONGO_URL' });
 ```
 
 To save your JSON message, make a call to `save`, passing in your JSON object.  You'll get an id to save as your callback_id in the Slack attachment JSON.  Example Botkit code:
@@ -69,6 +69,8 @@ To retrieve your JSON message in the interactive callback, make a call to `get`,
 ```
 controller.on('interactive_message_callback', async (bot, message) => {
     try {
+        const cb_msg = await interactiveStorage.get(message.callback_id)
+
         /* Do meaningful shit with the message */
         bot.reply(message, {
             text: `${cb_msg.third_party} button clicked`
