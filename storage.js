@@ -1,8 +1,10 @@
-var Store = require("jfs");
+var Store = require('jfs');
 var db = require('monk');
 var redis = require('redis');
 
 var uuid = require('uuid/v4');
+
+var Promise = require('bluebird');
 
 module.exports = function(config) {
 	if (!config) {
@@ -49,71 +51,151 @@ module.exports = function(config) {
 
 	var messages = {
 		save: function(msg, cb) {
-			if (!msg.id) {
-				msg.id = uuid();
-			}
-			
-			if (isLocal) {
-				msg_db.save(msg.id, msg, cb);
-			}
-			else if (isMongo) {
-				msg_db.insert(msg, function(err, result) {
-					cb(null, result.id);
-				});
-			}
-			else {
-				try {
-					msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+			if (cb) {
+				if (!msg.id) {
+					msg.id = uuid();
+				}
+				
+				if (isLocal) {
+					msg_db.save(msg.id, msg, function() {
 						cb(null, msg.id);
 					});
 				}
-				catch(ex) {
+				else if (isMongo) {
+					msg_db.insert(msg, function(err, result) {
+						cb(null, result.id);
+					});
+				}
+				else {
 					try {
-						setTimeout(function() {
-							msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
-								cb(null, msg.id);
-							});
-						}, 5000);
+						msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+							cb(null, msg.id);
+						});
 					}
 					catch(ex) {
-						cb(null, 0);
+						try {
+							setTimeout(function() {
+								msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+									cb(null, msg.id);
+								});
+							}, 5000);
+						}
+						catch(ex) {
+							cb(ex, null);
+						}
 					}
 				}
+			}
+			else {
+				return new Promise(function(resolve, reject) {
+					if (!msg.id) {
+						msg.id = uuid();
+					}
+					
+					if (isLocal) {
+						msg_db.save(msg.id, msg, function() {
+							resolve(msg.id);
+						});
+					}
+					else if (isMongo) {
+						msg_db.insert(msg, function(err, result) {
+							resolve(result.id);
+						});
+					}
+					else {
+						try {
+							msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+								resolve(msg.id);
+							});
+						}
+						catch(ex) {
+							try {
+								setTimeout(function() {
+									msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+										resolve(msg.id);
+									});
+								}, 5000);
+							}
+							catch(ex) {
+								reject(ex);
+							}
+						}
+					}
+				});
 			}
 		},
 		get: function(id, cb) {
-			if (isLocal) {
-				msg_db.get(id, function(err, result) {
-					msg_db.delete(id, function(err) {
-						cb(null, result);
-					});
-				});
-			}
-			else if (isMongo) {
-				msg_db.find({ id: id }, unwrapFromList(function(err, result) {
-					msg_db.remove({ id: id }, function(err) {
-						cb(null, result);
-					});
-				}));
-			}
-			else {
-				try {
-					msg_db.get('interactive:' + id, function(err, result) {
-						cb(null, JSON.parse(result));
+			if (cb) {
+				if (isLocal) {
+					msg_db.get(id, function(err, result) {
+						msg_db.delete(id, function(err) {
+							cb(null, result);
+						});
 					});
 				}
-				catch(ex) {
+				else if (isMongo) {
+					msg_db.find({ id: id }, unwrapFromList(function(err, result) {
+						msg_db.remove({ id: id }, function(err) {
+							cb(null, result);
+						});
+					}));
+				}
+				else {
 					try {
-						setTimeout(function() {
-							msg_db.get('interactive:' + id, function(err, result) {
-								cb(null, JSON.parse(result));
-							});
-						}, 5000);
+						msg_db.get('interactive:' + id, function(err, result) {
+							cb(null, JSON.parse(result));
+						});
 					}
 					catch(ex) {
-						cb(null, {});
+						try {
+							setTimeout(function() {
+								msg_db.get('interactive:' + id, function(err, result) {
+									cb(null, JSON.parse(result));
+								});
+							}, 5000);
+						}
+						catch(ex) {
+							cb(ex, null);
+						}
 					}
 				}
+			}
+			else {
+				return new Promise(function(resolve, reject) {
+					if (isLocal) {
+						msg_db.get(id, function(err, result) {
+							msg_db.delete(id, function(err) {
+								resolve(result);
+							});
+						});
+					}
+					else if (isMongo) {
+						msg_db.find({ id: id }, unwrapFromList(function(err, result) {
+							msg_db.remove({ id: id }, function(err) {
+								resolve(result);
+							});
+						}));
+					}
+					else {
+						try {
+							msg_db.get('interactive:' + id, function(err, result) {
+								resolve(JSON.parse(result));
+							});
+						}
+						catch(ex) {
+							try {
+								setTimeout(function() {
+									msg_db.get('interactive:' + id, function(err, result) {
+										resolve(JSON.parse(result));
+									});
+								}, 5000);
+							}
+							catch(ex) {
+								reject(ex);
+							}
+						}
+					}
+				});
 			}
 		}
 	};

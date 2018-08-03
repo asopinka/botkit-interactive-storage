@@ -4,10 +4,85 @@ Simple storage for your Botkit interactive callback messages.
 ### Install
 
 `npm install botkit-interactive-storage --save`
+`yarn add botkit-interactive-storage`
 
-You can also use [yarn](https://yarnpkg.com/en/) instead of [npm](https://www.npmjs.com/).
+### Usage with Async/Await and ES6/7 syntax (New New)
 
-### Usage
+Wherever you need to *save* or *retrieve* a big juicy JSON object for use in an interactive message callback, ensure you add the following:
+
+```
+var interactiveStorage = require('botkit-interactive-storage')({ mongo_uri: '<YOUR_MONGO_URL' });
+```
+
+To save your JSON message, make a call to `save`, passing in your JSON object.  You'll get an id to save as your callback_id in the Slack attachment JSON.  Example Botkit code:
+
+```
+controller.on(['direct_message','direct_mention'], async (bot, message) => {
+    const cb_msg = {
+        action: 'Message1_ButtonClick',
+        external_object_id: 'abc123',
+        external_object_link: 'google.com',
+        third_party: 'Google Drive',
+        other_info: 'more info you might need'
+    }
+
+    let id = null
+    try {
+        id = await interactiveStorage.save(cb_msg)
+    }
+    catch(err) {
+        // there was an error, handle it gracefully
+    }
+
+    // if id !== null, we successfully saved the JSON message so we can use the id in the Slack message
+    if (id !== null) {
+        bot.reply(message, {
+            text: 'Click a button',
+            attachments: [
+                {
+                    callback_id: id,
+                    actions: [
+                        {
+                            'name': 'yes',
+                            'text': ':thumbsup:',
+                            'value': 'yes',
+                            'type': 'button',
+                            'style': 'primary'
+                        },
+                        {
+                            'name': 'no',
+                            'text': ':thumbsdown:',
+                            'value': 'no',
+                            'type': 'button',
+                            'style': 'danger'
+                        }
+                    ];
+                }
+            ]
+        })
+    }
+})
+```
+
+To retrieve your JSON message in the interactive callback, make a call to `get`, passing in the callback_id from the message parameter object.  Example Botkit code:
+
+```
+controller.on('interactive_message_callback', async (bot, message) => {
+    try {
+        /* Do meaningful shit with the message */
+        bot.reply(message, {
+            text: `${cb_msg.third_party} button clicked`
+        })
+    }
+    catch(err) {
+        // error getting message, handle gracefully
+    }
+})
+```
+
+**NOTE**: `get` calls will also ***delete*** the stored message so as to save space, so you can ***only get the message once***.  Think of it like Snapchat for interactive callback messages.
+
+### Usage with Callbacks (Old-School)
 
 Wherever you need to *save* or *retrieve* a big juicy JSON object for use in an interactive message callback, ensure you add the following:
 
@@ -61,7 +136,7 @@ To retrieve your JSON message in the interactive callback, make a call to `get`,
 ```
 controller.on('interactive_message_callback', function(bot, message) {
     interactiveStorage.get(message.callback_id, function(err, cb_msg) {
-        /* Do meaningful shit like */
+        /* Do meaningful shit with the message */
         bot.reply(message, {
             text: cb_msg.third_party + ' button clicked'
         });
