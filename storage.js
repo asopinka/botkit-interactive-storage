@@ -75,7 +75,7 @@ module.exports = function(config) {
 					catch(ex) {
 						try {
 							setTimeout(function() {
-								msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+								msg_db.set('interactive:' + msg.id, JSON.stringify(msg), 'EX', config.ttl || -1, function(err, result) {
 									cb(null, msg.id);
 								});
 							}, 5000);
@@ -111,7 +111,7 @@ module.exports = function(config) {
 						catch(ex) {
 							try {
 								setTimeout(function() {
-									msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+									msg_db.set('interactive:' + msg.id, JSON.stringify(msg), 'EX', config.ttl || -1, function(err, result) {
 										resolve(msg.id);
 									});
 								}, 5000);
