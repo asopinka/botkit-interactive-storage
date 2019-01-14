@@ -68,7 +68,7 @@ module.exports = function(config) {
 				}
 				else {
 					try {
-						msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+						msg_db.set('interactive:' + msg.id, JSON.stringify(msg), 'EX', config.ttl || -1, function(err, result) {
 							cb(null, msg.id);
 						});
 					}
@@ -104,7 +104,7 @@ module.exports = function(config) {
 					}
 					else {
 						try {
-							msg_db.set('interactive:' + msg.id, JSON.stringify(msg), function(err, result) {
+							msg_db.set('interactive:' + msg.id, JSON.stringify(msg), 'EX', config.ttl || -1, function(err, result) {
 								resolve(msg.id);
 							});
 						}
