@@ -1,6 +1,6 @@
 {
   "name": "botkit-interactive-storage",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Simple storage for your Botkit interactive callback messages.",
   "main": "storage.js",
   "author": "Alex Sopinka",
@@ -8,7 +8,8 @@
   "dependencies": {
     "bluebird": "^3.5.1",
     "jfs": "^0.2.6",
-    "monk": "^4.0.0",
+    "monk": "^7.1.2",
+    "monk-middleware-wrap-non-dollar-update": "^0.2.1",
     "redis": "^2.8.0",
     "uuid": "^3.0.1"
   }
